@@ -4,8 +4,8 @@ What is `MERGE`?
 - Data Modification Language (DML) command that applies all three standard data manipulation language operations (INSERT, UPDATE, and DELETE) in a single transaction. 
 
 Why merge?
-- `atomicity`
-- simplifying application logic by pushing those to Delta
+- atomicity
+- simplifying application logic by pushing merge logic to Delta
 
 When merge? `apply selective changes without rewriting entire table`
 1. Slowly Changing Dimension
@@ -65,6 +65,100 @@ merge_conditions = """
 )
 ```
 
+### WHEN NOT MATCHED BY SOURCE
+
+> Use the WHEN NOT MATCHED BY SOURCE clause to UPDATE or DELETE records in the target table that do not have corresponding records in the source table.
+> 
+> WHEN NOT MATCHED BY SOURCE clauses are supported 
+> - by the Scala, Python and Java Delta Lake APIs in `Delta 2.3 and above`. 
+> - SQL is supported in Delta 2.4 and above.
+
+
+add conditions to WHEN NOT MATCHED BY SOURCE and specify values to update in unmatched target rows
+```sql
+MERGE INTO target
+    USING source
+    ON source.key = target.key
+    WHEN MATCHED THEN
+        UPDATE SET target.lastSeen = source.timestamp
+    WHEN NOT MATCHED THEN
+        INSERT (key, lastSeen, status) VALUES (source.key,  source.timestamp, 'active')
+    WHEN NOT MATCHED BY SOURCE AND target.lastSeen >= (current_date() - INTERVAL '5' DAY) THEN
+UPDATE SET target.status = 'inactive'
+```
+
+```python
+(targetDF
+    .merge(sourceDF, "source.key = target.key")
+    .whenMatchedUpdate(
+        set = {"target.lastSeen": "source.timestamp"}
+    )
+    .whenNotMatchedInsert(
+        values = {
+            "target.key": "source.key",
+            "target.lastSeen": "source.timestamp",
+            "target.status": "'active'"
+        }
+    )
+    .whenNotMatchedBySourceUpdate(
+        condition="target.lastSeen >= (current_date() - INTERVAL '5' DAY)",
+    )
+    .execute()
+)
+```
+
+### scd2
+
+```python
+customersTable = ...  # DeltaTable with schema (customerId, address, current, effectiveDate, endDate)
+
+updatesDF = ...       # DataFrame with schema (customerId, address, effectiveDate)
+
+# Rows to INSERT new addresses of existing customers
+newAddressesToInsert = updatesDF \
+  .alias("updates") \
+  .join(customersTable.toDF().alias("customers"), "customerid") \
+  .where("customers.current = true AND updates.address <> customers.address")
+
+# Stage the update by unioning two sets of rows
+# 1. Rows that will be inserted in the whenNotMatched clause
+# 2. Rows that will either update the current addresses of existing customers or insert the new addresses of new customers
+stagedUpdates = (
+  newAddressesToInsert
+  .selectExpr("NULL as mergeKey", "updates.*")   # Rows for 1
+  .union(updatesDF.selectExpr("updates.customerId as mergeKey", "*"))  # Rows for 2.
+)
+
+# Apply SCD Type 2 operation using merge
+customersTable
+    .alias("customer")
+    .merge(
+        stagedUpdates.alias("staged_updates"),
+        "customers.customerId = mergeKey"
+    )
+    .whenMatchedUpdate(
+        condition = "customer.current = true AND customers.address <> staged_updates.address",
+        # set current to false and endDate to source eff date
+        set = {
+            "current": "false",
+            "endDate": "staged_updates.effectiveDate"
+        }
+    )
+    .whenNotMatchedInsert(
+        values= {
+            "customerid": "staged_updates.customerId",
+            "address": "staged_updates.address",
+            # Set current to true along with new address and eff date
+            "current": "true",
+            "effectiveDate": "staged_updates.effectiveDate",
+            "endDate": "null
+        }
+    )
+    .execute()
+```
+
+### streaming
+
 ```scala
 // streaming pipeline updates session info
 streamingSessionUpdatesDF
@@ -112,3 +206,4 @@ Case `outer join` (rewriting files)
 - https://delta.io/blog/2023-02-14-delta-lake-merge/
 - https://www.databricks.com/blog/2020/09/29/diving-into-delta-lake-dml-internals-update-delete-merge.html
 - [Efficient Upserts into Data Lakes with Databricks Delta](https://www.databricks.com/blog/2019/03/19/efficient-upserts-into-data-lakes-databricks-delta.html)
+- [Table deletes, updates, and merges. Delta Lake doc.](https://docs.delta.io/latest/delta-update.html)
