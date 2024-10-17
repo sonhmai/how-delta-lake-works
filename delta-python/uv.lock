@@ -1,0 +1,65 @@
+version = 1
+requires-python = ">=3.11"
+
+[[package]]
+name = "delta-python"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "delta-spark" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "delta-spark", specifier = "==2.1.0" }]
+
+[[package]]
+name = "delta-spark"
+version = "2.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "importlib-metadata" },
+    { name = "pyspark" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4b/43/185b074f9bf9afb99250cc8044e04d2fd98793be397626ca19d0fe5f09c1/delta-spark-2.1.0.tar.gz", hash = "sha256:7f6d55d2344a39ad3ab3a0c08fb947a24a1a80d8bfa70318e66717d49ba8e8ce", size = 16398 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/76/b4/a3157b5f8912ee58e7701c45da9708337b970ca6090e715f33c8d746ea70/delta_spark-2.1.0-py3-none-any.whl", hash = "sha256:f3586cfddc871ffc7f12923ff4a4d601fc5efbf7b550e60388b22ede7f492fa1", size = 20467 },
+]
+
+[[package]]
+name = "importlib-metadata"
+version = "8.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "zipp" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cd/12/33e59336dca5be0c398a7482335911a33aa0e20776128f038019f1a95f1b/importlib_metadata-8.5.0.tar.gz", hash = "sha256:71522656f0abace1d072b9e5481a48f07c138e00f079c38c8f883823f9c26bd7", size = 55304 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/d9/a1e041c5e7caa9a05c925f4bdbdfb7f006d1f74996af53467bc394c97be7/importlib_metadata-8.5.0-py3-none-any.whl", hash = "sha256:45e54197d28b7a7f1559e60b95e7c567032b602131fbd588f1497f47880aa68b", size = 26514 },
+]
+
+[[package]]
+name = "py4j"
+version = "0.10.9.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ce/1f/b00295b6da3bd2f050912b9f71fdb436ae8f1601cf161365937d8553e24b/py4j-0.10.9.5.tar.gz", hash = "sha256:276a4a3c5a2154df1860ef3303a927460e02e97b047dc0a47c1c3fb8cce34db6", size = 761259 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/86/ec/60880978512d5569ca4bf32b3b4d7776a528ecf4bca4523936c98c92a3c8/py4j-0.10.9.5-py2.py3-none-any.whl", hash = "sha256:52d171a6a2b031d8a5d1de6efe451cf4f5baff1a2819aabc3741c8406539ba04", size = 199724 },
+]
+
+[[package]]
+name = "pyspark"
+version = "3.3.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "py4j" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0a/69/d5895f9355add0eadedc1e2a5141458cbfb0048ff6d3c5e31a50573e7566/pyspark-3.3.4.tar.gz", hash = "sha256:1f866be47130a522355240949ed50d9812a8f327bd7619f043ffe07fbcf7f7b6", size = 281490254 }
+
+[[package]]
+name = "zipp"
+version = "3.20.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/54/bf/5c0000c44ebc80123ecbdddba1f5dcd94a5ada602a9c225d84b5aaa55e86/zipp-3.20.2.tar.gz", hash = "sha256:bc9eb26f4506fda01b81bcde0ca78103b6e62f991b381fec825435c836edbc29", size = 24199 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/62/8b/5ba542fa83c90e09eac972fc9baca7a88e7e7ca4b221a89251954019308b/zipp-3.20.2-py3-none-any.whl", hash = "sha256:a817ac80d6cf4b23bf7f2828b7cabf326f15a001bea8b1f9b49631780ba28350", size = 9200 },
+]
