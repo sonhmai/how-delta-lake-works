@@ -1,0 +1,5 @@
+
+
+```python
+uv run pytest
+```
